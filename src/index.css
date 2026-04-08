@@ -1,0 +1,118 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f7f9fc;
+  color: #1f2937;
+}
+
+.titre {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.home {
+  min-height: 100vh;  /* espace navbar + footer */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+  padding: 24px;
+  background: #ffffff;
+  
+}
+
+.home h1 {
+  font-size: 30px;
+  color: orange;
+}
+
+.home p {
+  color: #374151;
+  max-width: 620px;
+  font-size: 20px;
+}
+
+.logo {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+.formulaire {
+  width: 100%;
+  max-width: 500px;
+}
+
+/* important: aligner les champs sous dessous */
+.formulaire form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+.formulaire label {
+  font-size: 14px;
+  font-weight: 600;
+  color: orange;
+}
+
+.formulaire input {
+  height: 42px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0 12px;
+  outline: none;
+}
+
+.formulaire input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.btn{
+  padding: 12px 22px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #eb7e25, #1d4ed8);
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 15px;
+  margin-top: 80px;
+  
+  
+}
+
+.signup {
+  background-color: #16a34a;
+}
+
+
+.footer {
+  text-align: center;
+  width: 100%;
+  background-color: #f1f5f9;
+  border-top: 1px solid #e5e7eb;
+  
+  position: fixed;
+  bottom: 0;
+  /* retire fixed pour eviter chevauchement */
+}
