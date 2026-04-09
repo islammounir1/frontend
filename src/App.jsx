@@ -1,14 +1,17 @@
 import React from 'react'
-import Navbar from './Components/Navbar';
-
-import Footer from './Components/Footer';
-
-import Home from './Pages/Home';
+import Header from './Component/Header'
+import Home from './Pages/Home'
+import Footer from './Component/Footer'
+import Description from './Pages/Description'
 
 export default function App() {
   return (
     <>
-    <Home />
+    <Header/>
+    
+    <Home/>
+    <Description/>
+
     <Footer/>
     </>
     
