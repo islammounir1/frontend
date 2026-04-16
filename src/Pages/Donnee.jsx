@@ -1,14 +1,12 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../Css/Donnee.css'
-import Modifier from './Modifier'
-import supprimer from './supprimer'
 import Détails from './Détails'
 export default function Donnees() {
   const [selectedEtudiant, setSelectedEtudiant] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const navigate = useNavigate()
-  const etudiants = [
+  const [etudiants, setEtudiants] = useState([
     {
       id: 1,
       cne: 'CNE001',
@@ -51,7 +49,11 @@ export default function Donnees() {
       etablissementAccueil: 'Université Lyon',
       photoUrl: 'https://via.placeholder.com/100'
     }
-  ]
+  ])
+
+  const supprimer = (id) => {
+    setEtudiants((prevEtudiants) => prevEtudiants.filter((etudiant) => etudiant.id !== id))
+  }
 
   const filteredEtudiants = etudiants.filter(e =>
     e.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
