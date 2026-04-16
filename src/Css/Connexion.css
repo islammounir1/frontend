@@ -1,0 +1,52 @@
+.login-container {
+  height: 100vh; display: flex; justify-content: center; align-items: center; 
+  background: transparent !important; position: relative; overflow: hidden;
+}
+
+.login-container h2 {
+  position: absolute; top: 10%; color: #1E293B; font-size: 32px;
+  font-family: 'Space Grotesk', serif;
+  background: linear-gradient(to right, #05044d, #4C8CE4);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+
+.login-form {
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(25px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
+  padding: 60px; border-radius: 30px !important; width: 550px !important;
+  box-shadow: 0 40px 100px rgba(5, 4, 77, 0.1), inset 0 0 20px rgba(255, 255, 255, 0.2) !important;
+  border: 1px solid rgba(5, 4, 77, 0.05) !important; text-align: center;
+  animation: floatUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; transition: all 0.5s ease;
+}
+
+.login-form:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 50px 120px rgba(5, 4, 77, 0.15);
+}
+
+.login-form h1 {
+  margin-bottom: 40px; font-size: 42px;
+}
+
+.login-form input {
+  padding: 18px 24px !important;
+  font-size: 1.05rem !important;
+  margin: 15px 0 !important;
+  border-radius: 15px !important;
+  border: 1px solid rgba(5, 4, 77, 0.1) !important;
+  width: 100%;
+}
+
+.login-form button {
+  padding: 18px !important;
+  font-size: 1.1rem !important;
+  margin-top: 30px !important;
+  border-radius: 15px !important;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 700;
+  width: 100%;
+  cursor: pointer;
+}
+

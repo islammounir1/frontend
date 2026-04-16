@@ -1,0 +1,10 @@
+
+.footer {
+  text-align: center; width: 100%;
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding: 25px 0; color: #406093; font-size: 1rem;
+  margin-top: auto;
+  margin-bottom: 0 !important;
+}

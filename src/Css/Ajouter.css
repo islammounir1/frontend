@@ -1,0 +1,96 @@
+/* Styles Ajouter CLEAN & PREMIUM */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.container h2 {
+  text-align: center;
+  margin-bottom: 40px;
+  font-size: 2.8rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+  background: linear-gradient(135deg, #05044d 0%, #4C8CE4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.form {
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(20px);
+  padding: 50px;
+  border-radius: 30px;
+  border: 1px solid rgba(5, 4, 77, 0.1);
+  box-shadow: 0 40px 100px rgba(5, 4, 77, 0.1);
+  width: 100%;
+  max-width: 950px;
+  margin: 0 auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 25px 30px;
+  margin-bottom: 40px;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .form {
+    padding: 30px;
+  }
+}
+
+.grid input,
+.grid select {
+  width: 100%;
+  padding: 16px 20px;
+  border: 1px solid rgba(5, 4, 77, 0.15) !important;
+  border-radius: 12px;
+  font-size: 1rem;
+  background-color: white;
+  color: #05044d;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.grid input:focus,
+.grid select:focus {
+  outline: none;
+  border-color: #4C8CE4 !important;
+  box-shadow: 0 10px 25px rgba(76, 140, 228, 0.15);
+  transform: translateY(-2px);
+}
+
+button[type="submit"] {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  margin: 10px auto 0;
+  padding: 18px 40px;
+  background: #05044d;
+  color: white !important;
+  border: none;
+  border-radius: 15px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: all 0.4s ease;
+  box-shadow: 0 15px 35px rgba(5, 4, 77, 0.2);
+}
+
+button[type="submit"]:hover {
+  background: #4C8CE4;
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(76, 140, 228, 0.3);
+}

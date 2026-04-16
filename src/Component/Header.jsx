@@ -1,49 +1,32 @@
 import React from "react";
-import logoo from "../assets/logoo.png";
+import { Link, useNavigate } from "react-router-dom";
+import "../Css/Header.css";
+import logo from "../assets/logo.png"
 
+const Header = () => {
+  const navigate = useNavigate();
 
-export default function Header() {
   return (
-    <>
-      <header className="header">
-        <img src={logoo} alt="logo ENSA" className="logo" />
-        <button className="login-btn">Login</button>
-      </header>
+    <header className="header">
+    
+      <div className="header-left">
+        <img src={logo} alt="Logo" className="logo" />
+      </div>
 
-      <style>
-        {`
-          .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1px 30px;
-            background-color: #ffffff;
-            position: fixed;  
-           top: 0;           
-           left: 0;
-           width: 1200px;
-           z-index: 1000; 
-
-          .logo {
-            height: 80px;
-          }
-
-          .login-btn {
-            padding: 15px 35px;
-            background-color: #195b8a;
-            color: white;
-             font-size : 15px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-          }
-
-          .login-btn:hover {
-            background-color: #184254;
-          }
-        `}
-      </style>
       
-    </>
+      
+
+     
+      <div className="header-right">
+        <button
+          className="login-btn"
+          onClick={() => navigate("/connexion")}
+        >
+          Login
+        </button>
+      </div>
+    </header>
   );
-}
+};
+
+export default Header;

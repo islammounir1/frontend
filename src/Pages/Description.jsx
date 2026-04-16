@@ -1,13 +1,15 @@
 import React from "react";
-import archive from "../assets/archive.png"; // mets ton image ici
+import archive from "../assets/archive.png"; 
+import "../Css/Description.css";
+
 
 export default function About() {
   return (
     <>
-      <div className="container">
+      <div className="desc-page-container">
         
-        {/* Texte à gauche */}
-        <div className="left">
+      
+        <div className="desc-text-section">
           <h1>Gestion des Archives</h1>
           <p>
             La gestion d’archives d’un site web consiste à organiser, conserver et retrouver
@@ -20,49 +22,14 @@ export default function About() {
           </p>
         </div>
 
-        {/* Image à droite */}
-        <div className="right">
+  
+        <div className="desc-image-section">
           <img src={archive} alt="archive" />
         </div>
 
       </div>
 
-      <style>
-        {`
-          .container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 50px;
-            height: 100vh;
-          }
-
-          .left {
-            width: 50%;
-          }
-
-          .left h1 {
-            font-size: 40px;
-            margin-bottom: 20px;
-          }
-
-          .left p {
-            font-size: 18px;
-            color: #555;
-          }
-
-          .right {
-            width: 50%;
-            display: flex;
-            justify-content: center;
-          }
-
-          .right img {
-            width: 80%;
-            border-radius: 10px;
-          }
-        `}
-      </style>
+     
     </>
   );
 }
