@@ -1,115 +1,132 @@
-import React, { useState } from "react";
-import "../Css/Ajouter.css";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import etudiantService from '../services/etudiantService';
+import { useSnackbar } from '../contexts/SnackbarContext';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Paper from '@mui/material/Paper';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import MenuItem from '@mui/material/MenuItem';
+import CircularProgress from '@mui/material/CircularProgress';
+import Fade from '@mui/material/Fade';
+import Divider from '@mui/material/Divider';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
- export default function Ajouter() {
-  const [form, setForm] = useState({
-    id: "",
-    cne: "",
-    cin: "",
-    nom: "",
-    prenom: "",
-    dateNaissance: "",
-    lieuNaissance: "",
-    nationalite: "",
-    sexe: "",
-    adresse: "",
-    telephone: "",
-    email: "",
-    nomPere: "",
-    nomMere: "",
-    adresseParents: "",
-    baccalaureat: "",
-    filiere: "",
-    anneeInscription: "",
-    etablissementOrigine: "",
-    etablissementAccueil: "",
-    photoUrl: ""
-  });
+const initialForm = {
+  cne:'', cin:'', nom:'', prenom:'', dateNaissance:'', lieuNaissance:'',
+  nationalite:'', sexe:'', adresse:'', telephone:'', email:'',
+  filiere:'', anneeInscription:'', nomPere:'', nomMere:'', adresseParents:'',
+  etablissementOrigine:'', etablissementAccueil:'', photoUrl:''
+};
 
-  const handleChange = (e) => {
+export default function Ajouter() {
+  const navigate = useNavigate();
+  const { showSuccess, showError } = useSnackbar();
+  const [form, setForm] = useState(initialForm);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: '' });
   };
 
-  const handleSubmit = async (e) => {
+  const validate = () => {
+    const err = {};
+    if (!form.cne) err.cne = 'Requis';
+    if (!form.cin) err.cin = 'Requis';
+    if (!form.nom) err.nom = 'Requis';
+    if (!form.prenom) err.prenom = 'Requis';
+    if (!form.dateNaissance) err.dateNaissance = 'Requis';
+    if (!form.lieuNaissance) err.lieuNaissance = 'Requis';
+    if (!form.nationalite) err.nationalite = 'Requis';
+    if (!form.sexe) err.sexe = 'Requis';
+    if (!form.adresse) err.adresse = 'Requis';
+    if (!form.telephone) err.telephone = 'Requis';
+    if (!form.email) err.email = 'Requis';
+    if (!form.filiere) err.filiere = 'Requis';
+    if (!form.anneeInscription) err.anneeInscription = 'Requis';
+    setErrors(err);
+    return Object.keys(err).length === 0;
+  };
+
+  const handleSubmit = async e => {
     e.preventDefault();
+    if (!validate()) return;
+    setLoading(true);
     try {
-      await fetch('http://localhost:5000/etudiants', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
-      });
-     
-      alert('Étudiant ajouté avec succès !');
-      setForm({
-        id: "",
-        cne: "",
-        cin: "",
-        nom: "",
-        prenom: "",
-        dateNaissance: "",
-        lieuNaissance: "",
-        nationalite: "",
-        sexe: "",
-        adresse: "",
-        telephone: "",
-        email: "",
-        nomPere: "",
-        nomMere: "",
-        adresseParents: "",
-        baccalaureat: "",
-        filiere: "",
-        anneeInscription: "",
-        etablissementOrigine: "",
-        etablissementAccueil: "",
-        photoUrl: ""
-      });
-      alert("Étudiant ajouté !");
+      await etudiantService.create(form);
+      showSuccess('Étudiant ajouté avec succès !');
+      setForm(initialForm);
+      navigate('/diagramme/donnee');
     } catch (err) {
-      console.error('Erreur:', err);
-      alert('Erreur lors de l\'ajout');
-    }
+      showError(err?.userMessage || 'Erreur lors de l\'ajout');
+    } finally { setLoading(false); }
   };
 
   return (
-    <div className="container">
-      <h2>Ajouter Étudiant</h2>
+    <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/diagramme/donnee')} color="inherit">Retour</Button>
+      </Box>
 
-      <form className="form" onSubmit={handleSubmit}>
-        <div className="grid">
-          <input name="cne" value={form.cne} placeholder="CNE" onChange={handleChange} />
-          <input name="cin" value={form.cin} placeholder="CIN" onChange={handleChange} />
+      <Fade in timeout={500}>
+        <Paper sx={{ p: { xs: 3, md: 4 }, border: '1px solid rgba(0,0,0,0.04)' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+            <Box sx={{ width: 48, height: 48, borderRadius: 2.5, background: 'linear-gradient(135deg, #1565C0, #42A5F5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <PersonAddIcon sx={{ color: '#fff', fontSize: 24 }} />
+            </Box>
+            <Box>
+              <Typography variant="h5" sx={{ fontWeight: 700 }}>Ajouter un Étudiant</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>Remplissez les informations ci-dessous</Typography>
+            </Box>
+          </Box>
 
-          <input name="nom" value={form.nom} placeholder="Nom" onChange={handleChange} />
-          <input name="prenom" value={form.prenom} placeholder="Prénom" onChange={handleChange} />
+          <Divider sx={{ mb: 3 }} />
 
-          <input type="date" name="dateNaissance" value={form.dateNaissance} onChange={handleChange} />
-          <input name="lieuNaissance" value={form.lieuNaissance} placeholder="Lieu de naissance" onChange={handleChange} />
+          <form onSubmit={handleSubmit}>
+            <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 2, fontWeight: 600 }}>Informations personnelles</Typography>
+            <Grid container spacing={2.5} sx={{ mb: 3 }}>
+              <Grid size={{xs:12,sm:6,md:4}}><TextField fullWidth name="cne" label="CNE" value={form.cne} onChange={handleChange} error={!!errors.cne} helperText={errors.cne} required /></Grid>
+              <Grid size={{xs:12,sm:6,md:4}}><TextField fullWidth name="cin" label="CIN" value={form.cin} onChange={handleChange} error={!!errors.cin} helperText={errors.cin} required /></Grid>
+              <Grid size={{xs:12,sm:6,md:4}}><TextField fullWidth name="nom" label="Nom" value={form.nom} onChange={handleChange} error={!!errors.nom} helperText={errors.nom} required /></Grid>
+              <Grid size={{xs:12,sm:6,md:4}}><TextField fullWidth name="prenom" label="Prénom" value={form.prenom} onChange={handleChange} error={!!errors.prenom} helperText={errors.prenom} required /></Grid>
+              <Grid size={{xs:12,sm:6,md:4}}><TextField fullWidth name="dateNaissance" label="Date de naissance" type="date" value={form.dateNaissance} onChange={handleChange} error={!!errors.dateNaissance} helperText={errors.dateNaissance} InputLabelProps={{shrink:true}} required /></Grid>
+              <Grid size={{xs:12,sm:6,md:4}}><TextField fullWidth name="lieuNaissance" label="Lieu de naissance" value={form.lieuNaissance} onChange={handleChange} error={!!errors.lieuNaissance} helperText={errors.lieuNaissance} required /></Grid>
+              <Grid size={{xs:12,sm:6,md:4}}><TextField fullWidth name="nationalite" label="Nationalité" value={form.nationalite} onChange={handleChange} error={!!errors.nationalite} helperText={errors.nationalite} required /></Grid>
+              <Grid size={{xs:12,sm:6,md:4}}><TextField fullWidth select name="sexe" label="Sexe" value={form.sexe} onChange={handleChange} error={!!errors.sexe} helperText={errors.sexe} required><MenuItem value="MASCULIN">Masculin</MenuItem><MenuItem value="FEMININ">Féminin</MenuItem></TextField></Grid>
+              <Grid size={{xs:12,sm:6,md:4}}><TextField fullWidth name="telephone" label="Téléphone" value={form.telephone} onChange={handleChange} error={!!errors.telephone} helperText={errors.telephone} required /></Grid>
+              <Grid size={{xs:12,sm:6}}><TextField fullWidth name="email" label="Email" type="email" value={form.email} onChange={handleChange} error={!!errors.email} helperText={errors.email} required /></Grid>
+              <Grid size={{xs:12,sm:6}}><TextField fullWidth name="adresse" label="Adresse" value={form.adresse} onChange={handleChange} error={!!errors.adresse} helperText={errors.adresse} required /></Grid>
+            </Grid>
 
-          <input name="nationalite" value={form.nationalite} placeholder="Nationalité" onChange={handleChange} />
+            <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 2, fontWeight: 600 }}>Informations académiques</Typography>
+            <Grid container spacing={2.5} sx={{ mb: 3 }}>
+              <Grid size={{xs:12,sm:6,md:4}}><TextField fullWidth name="filiere" label="Filière" value={form.filiere} onChange={handleChange} error={!!errors.filiere} helperText={errors.filiere} required /></Grid>
+              <Grid size={{xs:12,sm:6,md:4}}><TextField fullWidth name="anneeInscription" label="Année d'inscription" type="number" value={form.anneeInscription} onChange={handleChange} error={!!errors.anneeInscription} helperText={errors.anneeInscription} required /></Grid>
+              <Grid size={{xs:12,sm:6,md:4}}><TextField fullWidth name="etablissementOrigine" label="Établissement d'origine" value={form.etablissementOrigine} onChange={handleChange} /></Grid>
+              <Grid size={{xs:12,sm:6,md:4}}><TextField fullWidth name="etablissementAccueil" label="Établissement d'accueil" value={form.etablissementAccueil} onChange={handleChange} /></Grid>
+            </Grid>
 
-          <select name="sexe" value={form.sexe} onChange={handleChange}>
-            <option value="">Sexe</option>
-            <option value="Homme">Homme</option>
-            <option value="Femme">Femme</option>
-          </select>
+            <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 2, fontWeight: 600 }}>Informations familiales</Typography>
+            <Grid container spacing={2.5} sx={{ mb: 4 }}>
+              <Grid size={{xs:12,sm:6,md:4}}><TextField fullWidth name="nomPere" label="Nom du père" value={form.nomPere} onChange={handleChange} /></Grid>
+              <Grid size={{xs:12,sm:6,md:4}}><TextField fullWidth name="nomMere" label="Nom de la mère" value={form.nomMere} onChange={handleChange} /></Grid>
+              <Grid size={{xs:12,sm:6,md:4}}><TextField fullWidth name="adresseParents" label="Adresse des parents" value={form.adresseParents} onChange={handleChange} /></Grid>
+            </Grid>
 
-          <input name="adresse" value={form.adresse} placeholder="Adresse" onChange={handleChange} />
-          <input name="telephone" value={form.telephone} placeholder="Téléphone" onChange={handleChange} />
-
-          <input name="email" value={form.email} placeholder="Email" onChange={handleChange} />
-          <input name="filiere" value={form.filiere} placeholder="Filière" onChange={handleChange} />
-          <input name="nomPere" value={form.nomPere} placeholder="Nom Père" onChange={handleChange} />
-          <input name="nomMere" value={form.nomMere} placeholder="Nom Mère" onChange={handleChange} />
-          <input name="adresseParents" value={form.adresseParents} placeholder="Adresse Parents" onChange={handleChange} />
-          <input name="baccalaureat" value={form.baccalaureat} placeholder="Baccalauréat" onChange={handleChange} />
-          <input name="anneeInscription" value={form.anneeInscription} placeholder="Année Inscription" onChange={handleChange} />
-          <input name="etablissementOrigine" value={form.etablissementOrigine} placeholder="Établissement Origine" onChange={handleChange} />
-          <input name="etablissementAccueil" value={form.etablissementAccueil} placeholder="Établissement Accueil" onChange={handleChange} />
-          <input name="photoUrl" value={form.photoUrl} placeholder="Photo URL" onChange={handleChange} />
-        </div>
-
-        <button type="submit">Ajouter</button>
-      </form>
-    </div>
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+              <Button variant="outlined" onClick={() => navigate('/diagramme/donnee')} color="inherit" disabled={loading}>Annuler</Button>
+              <Button type="submit" variant="contained" disabled={loading} sx={{ background: 'linear-gradient(135deg, #1565C0, #42A5F5)', minWidth: 160 }}>
+                {loading ? <CircularProgress size={22} sx={{color:'#fff'}} /> : 'Ajouter l\'étudiant'}
+              </Button>
+            </Box>
+          </form>
+        </Paper>
+      </Fade>
+    </Box>
   );
-};
+}
