@@ -36,9 +36,13 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import FolderIcon from '@mui/icons-material/Folder';
 import LogoutIcon from '@mui/icons-material/Logout';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import HomeIcon from '@mui/icons-material/Home';
-import LoginIcon from '@mui/icons-material/Login';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem';
+import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import ArchiveIcon from '@mui/icons-material/Archive';
+
+// Logo
+import ensaLogo from './assets/ensa-logo.png';
 
 // Pages
 import Home from './Pages/Home';
@@ -48,22 +52,81 @@ import Ajouter from './Pages/Ajouter';
 import Admin from './Pages/Admin';
 import Adduti from './Pages/Adduti';
 import Donnee from './Pages/Donnee';
+import Dossiers from './Pages/Dossiers';
+import Mouvements from './Pages/Mouvements';
+import Reclamations from './Pages/Reclamations';
+import Transferts from './Pages/Transferts';
+import NotFound from './Pages/NotFound';
 
 const DRAWER_WIDTH = 260;
 
-// ─── Menu Items ────────────────────────────────────────────────────
-const menuItems = [
-  { text: 'Dashboard', icon: <DashboardIcon />, path: '/diagramme' },
-  { text: 'Étudiants', icon: <SchoolIcon />, path: '/diagramme/donnee' },
-  { text: 'Ajouter Étudiant', icon: <PersonAddIcon />, path: '/ajouter' },
-  { text: 'Utilisateurs', icon: <PeopleIcon />, path: '/adduti' },
-  { text: 'Ajouter Utilisateur', icon: <AdminPanelSettingsIcon />, path: '/diagramme/admin' },
+// ─── Menu Items avec contrôle d'accès par rôle ───────────────────
+const allMenuItems = [
+  {
+    text: 'Dashboard',
+    icon: <DashboardIcon />,
+    path: '/diagramme',
+    roles: ['SUPER_ADMIN', 'ADMIN_SYSTEME', 'RESPONSABLE_ARCHIVES', 'AGENT_ACCUEIL', 'CONSULTANT'],
+  },
+  {
+    text: 'Étudiants',
+    icon: <SchoolIcon />,
+    path: '/diagramme/donnee',
+    roles: ['SUPER_ADMIN', 'ADMIN_SYSTEME', 'RESPONSABLE_ARCHIVES', 'AGENT_ACCUEIL'],
+  },
+  {
+    text: 'Ajouter Étudiant',
+    icon: <PersonAddIcon />,
+    path: '/ajouter',
+    roles: ['SUPER_ADMIN', 'ADMIN_SYSTEME', 'RESPONSABLE_ARCHIVES', 'AGENT_ACCUEIL'],
+  },
+  {
+    text: 'Dossiers',
+    icon: <FolderIcon />,
+    path: '/dossiers',
+    roles: ['SUPER_ADMIN', 'ADMIN_SYSTEME', 'RESPONSABLE_ARCHIVES', 'AGENT_ACCUEIL', 'CONSULTANT'],
+  },
+  {
+    text: 'Mouvements',
+    icon: <SwapHorizIcon />,
+    path: '/mouvements',
+    roles: ['SUPER_ADMIN', 'ADMIN_SYSTEME', 'AGENT_ACCUEIL'],
+  },
+  {
+    text: 'Réclamations',
+    icon: <ReportProblemIcon />,
+    path: '/reclamations',
+    roles: ['SUPER_ADMIN', 'ADMIN_SYSTEME', 'RESPONSABLE_ARCHIVES', 'AGENT_ACCUEIL', 'CONSULTANT', 'ETUDIANT'],
+  },
+  {
+    text: 'Transferts',
+    icon: <CompareArrowsIcon />,
+    path: '/transferts',
+    roles: ['SUPER_ADMIN', 'ADMIN_SYSTEME', 'RESPONSABLE_ARCHIVES'],
+  },
+  {
+    text: 'Utilisateurs',
+    icon: <PeopleIcon />,
+    path: '/adduti',
+    roles: ['SUPER_ADMIN', 'ADMIN_SYSTEME', 'RESPONSABLE_ARCHIVES'],
+  },
+  {
+    text: 'Ajouter Utilisateur',
+    icon: <AdminPanelSettingsIcon />,
+    path: '/diagramme/admin',
+    roles: ['SUPER_ADMIN', 'ADMIN_SYSTEME'],
+  },
 ];
 
 // ─── Sidebar Drawer ────────────────────────────────────────────────
 function SidebarContent({ onItemClick }) {
   const location = useLocation();
   const { user } = useAuth();
+
+  // Filtrer les items du menu selon le rôle de l'utilisateur
+  const menuItems = allMenuItems.filter(
+    (item) => !item.roles || item.roles.includes(user?.role)
+  );
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -77,7 +140,21 @@ function SidebarContent({ onItemClick }) {
           background: 'linear-gradient(135deg, #0D47A1, #1565C0)',
         }}
       >
-        <ArchiveIcon sx={{ color: '#FFB74D', fontSize: 32 }} />
+        <Box
+          component="img"
+          src={ensaLogo}
+          alt="ENSA Logo"
+          sx={{
+            width: 52,
+            height: 52,
+            borderRadius: 2,
+            objectFit: 'contain',
+            bgcolor: '#fff',
+            p: 0.5,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            animation: 'logoPulse 3s ease-in-out infinite',
+          }}
+        />
         <Box>
           <Typography
             variant="h6"
@@ -400,30 +477,59 @@ function AppRoutes() {
   return (
     <DashboardLayout>
       <Routes>
+        {/* Dashboard */}
         <Route
           path="/diagramme"
-          element={
-            <ProtectedRoute>
-              <Diagramme />
-            </ProtectedRoute>
-          }
+          element={<ProtectedRoute><Diagramme /></ProtectedRoute>}
         />
+
+        {/* Étudiants */}
         <Route
           path="/diagramme/donnee"
-          element={
-            <ProtectedRoute>
-              <Donnee />
-            </ProtectedRoute>
-          }
+          element={<ProtectedRoute><Donnee /></ProtectedRoute>}
         />
         <Route
           path="/ajouter"
+          element={<ProtectedRoute><Ajouter /></ProtectedRoute>}
+        />
+
+        {/* Dossiers */}
+        <Route
+          path="/dossiers"
           element={
-            <ProtectedRoute>
-              <Ajouter />
+            <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN_SYSTEME', 'RESPONSABLE_ARCHIVES', 'AGENT_ACCUEIL', 'CONSULTANT']}>
+              <Dossiers />
             </ProtectedRoute>
           }
         />
+
+        {/* Mouvements */}
+        <Route
+          path="/mouvements"
+          element={
+            <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN_SYSTEME', 'AGENT_ACCUEIL']}>
+              <Mouvements />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Réclamations */}
+        <Route
+          path="/reclamations"
+          element={<ProtectedRoute><Reclamations /></ProtectedRoute>}
+        />
+
+        {/* Transferts */}
+        <Route
+          path="/transferts"
+          element={
+            <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN_SYSTEME', 'RESPONSABLE_ARCHIVES']}>
+              <Transferts />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Utilisateurs */}
         <Route
           path="/diagramme/admin"
           element={
@@ -435,13 +541,14 @@ function AppRoutes() {
         <Route
           path="/adduti"
           element={
-            <ProtectedRoute
-              roles={['SUPER_ADMIN', 'ADMIN_SYSTEME', 'RESPONSABLE_ARCHIVES']}
-            >
+            <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN_SYSTEME', 'RESPONSABLE_ARCHIVES']}>
               <Adduti />
             </ProtectedRoute>
           }
         />
+
+        {/* 404 — Catch-all */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </DashboardLayout>
   );

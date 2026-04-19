@@ -1,5 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
+/* ─── Logo Animations ───────────────────────────────────────────── */
+@keyframes logoPulse {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(21, 101, 192, 0.3)); transform: scale(1); }
+  50% { filter: drop-shadow(0 0 14px rgba(21, 101, 192, 0.5)); transform: scale(1.04); }
+}
+
+@keyframes logoShine {
+  0% { filter: brightness(1); }
+  50% { filter: brightness(1.15); }
+  100% { filter: brightness(1); }
+}
+
 /* ─── Global Reset ──────────────────────────────────────────────── */
 *, *::before, *::after {
   margin: 0;

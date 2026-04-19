@@ -19,8 +19,10 @@ import EmailIcon from '@mui/icons-material/Email';
 import LockIcon from '@mui/icons-material/Lock';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import ArchiveIcon from '@mui/icons-material/Archive';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+
+// Logo
+import ensaLogo from '../assets/ensa-logo.png';
 
 export default function Connexion() {
   const navigate = useNavigate();
@@ -146,21 +148,23 @@ export default function Connexion() {
           {/* Header */}
           <Box sx={{ textAlign: 'center', mb: 4 }}>
             <Box
+              component="img"
+              src={ensaLogo}
+              alt="ENSA Logo"
               sx={{
-                width: 56,
-                height: 56,
+                width: 80,
+                height: 80,
+                objectFit: 'contain',
                 borderRadius: 3,
-                background: 'linear-gradient(135deg, #1565C0, #42A5F5)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                bgcolor: '#fff',
+                p: 1.5,
                 mx: 'auto',
                 mb: 2,
+                display: 'block',
                 boxShadow: '0 4px 16px rgba(21, 101, 192, 0.3)',
+                animation: 'logoPulse 3s ease-in-out infinite',
               }}
-            >
-              <ArchiveIcon sx={{ color: '#fff', fontSize: 28 }} />
-            </Box>
+            />
             <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary' }}>
               Connexion
             </Typography>

@@ -15,6 +15,10 @@ import Fade from '@mui/material/Fade';
 // Icons
 import ArchiveIcon from '@mui/icons-material/Archive';
 import LoginIcon from '@mui/icons-material/Login';
+
+// Logo
+import ensaLogo from '../assets/ensa-logo.png';
+
 import SecurityIcon from '@mui/icons-material/Security';
 import SpeedIcon from '@mui/icons-material/Speed';
 import StorageIcon from '@mui/icons-material/Storage';
@@ -78,7 +82,7 @@ export default function Home() {
       >
         <Toolbar sx={{ px: { xs: 2, md: 4 } }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1 }}>
-            <ArchiveIcon sx={{ color: '#1565C0', fontSize: 28 }} />
+            <Box component="img" src={ensaLogo} alt="ENSA Logo" sx={{ width: 42, height: 42, objectFit: 'contain', animation: 'logoShine 3s ease-in-out infinite' }} />
             <Typography
               variant="h6"
               sx={{ fontWeight: 700, color: '#1A2027', letterSpacing: '-0.02em' }}
@@ -144,21 +148,23 @@ export default function Home() {
           <Fade in timeout={800}>
             <Box>
               <Box
+                component="img"
+                src={ensaLogo}
+                alt="ENSA Logo"
                 sx={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: 4,
-                  background: 'linear-gradient(135deg, #0D47A1, #42A5F5)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  width: 100,
+                  height: 100,
+                  objectFit: 'contain',
+                  borderRadius: 3,
+                  bgcolor: '#fff',
+                  p: 2,
                   mx: 'auto',
                   mb: 3,
+                  display: 'block',
                   boxShadow: '0 8px 32px rgba(21, 101, 192, 0.25)',
+                  animation: 'logoPulse 3s ease-in-out infinite',
                 }}
-              >
-                <ArchiveIcon sx={{ color: '#FFB74D', fontSize: 40 }} />
-              </Box>
+              />
 
               <Typography
                 variant="h3"

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import utilisateurService from '../services/utilisateurService';
+import api from '../services/api';
 import { useSnackbar } from '../contexts/SnackbarContext';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -30,6 +31,10 @@ import PeopleIcon from '@mui/icons-material/People';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import InventoryIcon from '@mui/icons-material/Inventory';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
+import CircularProgress from '@mui/material/CircularProgress';
+import Tooltip from '@mui/material/Tooltip';
 
 const ROLE_CONFIG = {
   SUPER_ADMIN: { label: 'Super Admin', color: '#C62828', bg: '#FFEBEE' },
@@ -49,6 +54,9 @@ export default function Adduti() {
   const [editDialog, setEditDialog] = useState({ open: false, user: null });
   const [editForm, setEditForm] = useState({});
   const [editLoading, setEditLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => { loadUsers(); }, []);
 
@@ -91,6 +99,44 @@ export default function Adduti() {
     responsables: users.filter(u => u.role === 'RESPONSABLE_ARCHIVES').length,
   };
 
+  // ─── Export Excel ───────────────────────────────────────────
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const res = await utilisateurService.export();
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `utilisateurs_${new Date().toISOString().slice(0,10)}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      showSuccess('Fichier Excel exporté avec succès !');
+    } catch { showError('Erreur lors de l\'export Excel'); }
+    finally { setExporting(false); }
+  };
+
+  // ─── Import Excel ───────────────────────────────────────────
+  const handleImport = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setImporting(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      await api.post('/utilisateurs/import', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      showSuccess('Fichier Excel importé avec succès !');
+      loadUsers();
+    } catch { showError('Erreur lors de l\'import Excel'); }
+    finally {
+      setImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
@@ -98,9 +144,25 @@ export default function Adduti() {
           <Typography variant="h4" sx={{ fontWeight: 700 }}>Gestion des Utilisateurs</Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>{users.length} utilisateurs enregistrés</Typography>
         </Box>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/diagramme/admin')} sx={{ background: 'linear-gradient(135deg, #E65100, #FF8F00)', '&:hover': { background: 'linear-gradient(135deg, #BF360C, #E65100)' } }}>
-          Ajouter utilisateur
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+          {/* Import */}
+          <input type="file" ref={fileInputRef} accept=".xlsx,.xls,.csv" onChange={handleImport} style={{ display: 'none' }} id="import-excel-users" />
+          <Tooltip title="Importer depuis Excel">
+            <Button variant="outlined" startIcon={importing ? <CircularProgress size={18} /> : <FileUploadIcon />} onClick={() => fileInputRef.current?.click()} disabled={importing} sx={{ borderColor: '#2E7D32', color: '#2E7D32', '&:hover': { borderColor: '#1B5E20', bgcolor: 'rgba(46,125,50,0.04)' } }}>
+              Importer
+            </Button>
+          </Tooltip>
+          {/* Export */}
+          <Tooltip title="Exporter vers Excel">
+            <Button variant="outlined" startIcon={exporting ? <CircularProgress size={18} /> : <FileDownloadIcon />} onClick={handleExport} disabled={exporting} sx={{ borderColor: '#E65100', color: '#E65100', '&:hover': { borderColor: '#BF360C', bgcolor: 'rgba(230,81,0,0.04)' } }}>
+              Exporter
+            </Button>
+          </Tooltip>
+          {/* Add */}
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/diagramme/admin')} sx={{ background: 'linear-gradient(135deg, #E65100, #FF8F00)', '&:hover': { background: 'linear-gradient(135deg, #BF360C, #E65100)' } }}>
+            Ajouter
+          </Button>
+        </Box>
       </Box>
 
       {/* Stats */}
@@ -172,7 +234,7 @@ export default function Adduti() {
             <Grid size={{xs:12,sm:6}}><TextField fullWidth label="Prénom" value={editForm.prenom||''} onChange={e => setEditForm({...editForm,prenom:e.target.value})} /></Grid>
             <Grid size={{xs:12}}><TextField fullWidth label="Email" value={editForm.email||''} onChange={e => setEditForm({...editForm,email:e.target.value})} /></Grid>
             <Grid size={{xs:12,sm:6}}><TextField fullWidth label="Téléphone" value={editForm.telephone||''} onChange={e => setEditForm({...editForm,telephone:e.target.value})} /></Grid>
-            <Grid size={{xs:12,sm:6}}><TextField fullWidth select label="Rôle" value={editForm.role||''} onChange={e => setEditForm({...editForm,role:e.target.value})}><MenuItem value="ADMIN_SYSTEME">Admin Système</MenuItem><MenuItem value="RESPONSABLE_ARCHIVES">Resp. Archives</MenuItem><MenuItem value="AGENT_ACCUEIL">Agent Accueil</MenuItem></TextField></Grid>
+            <Grid size={{xs:12,sm:6}}><TextField fullWidth select label="Rôle" value={editForm.role||''} onChange={e => setEditForm({...editForm,role:e.target.value})}><MenuItem value="SUPER_ADMIN">Super Admin</MenuItem><MenuItem value="ADMIN_SYSTEME">Admin Système</MenuItem><MenuItem value="RESPONSABLE_ARCHIVES">Resp. Archives</MenuItem><MenuItem value="AGENT_ACCUEIL">Agent Accueil</MenuItem><MenuItem value="CONSULTANT">Consultant</MenuItem></TextField></Grid>
           </Grid>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
