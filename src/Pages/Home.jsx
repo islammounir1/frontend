@@ -17,7 +17,7 @@ import ArchiveIcon from '@mui/icons-material/Archive';
 import LoginIcon from '@mui/icons-material/Login';
 
 // Logo
-import ensaLogo from '../assets/ensa-logo.png';
+import ensaLogo from '../assets/ensa-logo.jpg';
 
 import SecurityIcon from '@mui/icons-material/Security';
 import SpeedIcon from '@mui/icons-material/Speed';
@@ -81,8 +81,22 @@ export default function Home() {
         }}
       >
         <Toolbar sx={{ px: { xs: 2, md: 4 } }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1 }}>
-            <Box component="img" src={ensaLogo} alt="ENSA Logo" sx={{ width: 42, height: 42, objectFit: 'contain', animation: 'logoShine 3s ease-in-out infinite' }} />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, flexGrow: 1 }}>
+            <Box
+              component="img"
+              src={ensaLogo}
+              alt="ENSA Logo"
+              width={88}
+              height={38}
+              sx={{
+                width: 88,
+                height: 38,
+                objectFit: 'contain',
+                imageRendering: 'auto',
+                animation: 'logoShine 3s ease-in-out infinite',
+                willChange: 'opacity',
+              }}
+            />
             <Typography
               variant="h6"
               sx={{ fontWeight: 700, color: '#1A2027', letterSpacing: '-0.02em' }}
@@ -151,18 +165,19 @@ export default function Home() {
                 component="img"
                 src={ensaLogo}
                 alt="ENSA Logo"
+                loading="lazy"
+                width={220}
+                height={96}
                 sx={{
-                  width: 100,
-                  height: 100,
+                  width: { xs: 180, md: 220 },
+                  height: 'auto',
                   objectFit: 'contain',
-                  borderRadius: 3,
-                  bgcolor: '#fff',
-                  p: 2,
+                  imageRendering: 'auto',
                   mx: 'auto',
                   mb: 3,
                   display: 'block',
-                  boxShadow: '0 8px 32px rgba(21, 101, 192, 0.25)',
                   animation: 'logoPulse 3s ease-in-out infinite',
+                  willChange: 'transform, opacity',
                 }}
               />
 

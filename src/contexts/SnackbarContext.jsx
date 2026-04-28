@@ -7,10 +7,6 @@ import { setGlobalErrorHandler } from '../services/api';
 // ─── Context ───────────────────────────────────────────────────────
 const SnackbarContext = createContext(null);
 
-function SlideTransition(props) {
-  return <Slide {...props} direction="up" />;
-}
-
 // ─── Provider ──────────────────────────────────────────────────────
 export function SnackbarProvider({ children }) {
   const [snackbar, setSnackbar] = useState({
@@ -69,7 +65,8 @@ export function SnackbarProvider({ children }) {
         autoHideDuration={5000}
         onClose={handleClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        TransitionComponent={SlideTransition}
+        slots={{ transition: Slide }}
+        slotProps={{ transition: { direction: 'up' } }}
       >
         <Alert
           onClose={handleClose}

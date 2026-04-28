@@ -271,7 +271,7 @@ export default function Dossiers() {
               </TextField>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField fullWidth label="Date d'archivage" type="date" value={form.dateArchivage} onChange={e => setForm({ ...form, dateArchivage: e.target.value })} InputLabelProps={{ shrink: true }} />
+              <TextField fullWidth label="Date d'archivage" type={form.dateArchivage ? "date" : "text"} onFocus={(e) => e.target.type = "date"} onBlur={(e) => { if (!form.dateArchivage) e.target.type = "text"; }} value={form.dateArchivage} onChange={e => setForm({ ...form, dateArchivage: e.target.value })} />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField fullWidth label="Localisation" value={form.localisation} onChange={e => setForm({ ...form, localisation: e.target.value })} />

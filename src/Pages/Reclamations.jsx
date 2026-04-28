@@ -243,7 +243,7 @@ export default function Reclamations() {
               <TextField fullWidth label="Type de demande" value={form.typeDemande} onChange={e => setForm({ ...form, typeDemande: e.target.value })} required />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField fullWidth label="Date" type="date" value={form.dateDemande} onChange={e => setForm({ ...form, dateDemande: e.target.value })} InputLabelProps={{ shrink: true }} required />
+              <TextField fullWidth label="Date" type={form.dateDemande ? "date" : "text"} onFocus={(e) => e.target.type = "date"} onBlur={(e) => { if (!form.dateDemande) e.target.type = "text"; }} value={form.dateDemande} onChange={e => setForm({ ...form, dateDemande: e.target.value })} required />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField fullWidth select label="Statut" value={form.statut} onChange={e => setForm({ ...form, statut: e.target.value })} required>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -42,21 +42,39 @@ import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import ArchiveIcon from '@mui/icons-material/Archive';
 
 // Logo
-import ensaLogo from './assets/ensa-logo.png';
+import ensaLogo from './assets/ensa-logo.jpg';
 
-// Pages
-import Home from './Pages/Home';
-import Connexion from './Pages/Connexion';
-import Diagramme from './Pages/Diagramme';
-import Ajouter from './Pages/Ajouter';
-import Admin from './Pages/Admin';
-import Adduti from './Pages/Adduti';
-import Donnee from './Pages/Donnee';
-import Dossiers from './Pages/Dossiers';
-import Mouvements from './Pages/Mouvements';
-import Reclamations from './Pages/Reclamations';
-import Transferts from './Pages/Transferts';
-import NotFound from './Pages/NotFound';
+// Pages — Lazy loaded for code splitting
+const Home = React.lazy(() => import('./Pages/Home'));
+const Connexion = React.lazy(() => import('./Pages/Connexion'));
+const Diagramme = React.lazy(() => import('./Pages/Diagramme'));
+const Ajouter = React.lazy(() => import('./Pages/Ajouter'));
+const Admin = React.lazy(() => import('./Pages/Admin'));
+const Adduti = React.lazy(() => import('./Pages/Adduti'));
+const Donnee = React.lazy(() => import('./Pages/Donnee'));
+const Dossiers = React.lazy(() => import('./Pages/Dossiers'));
+const Mouvements = React.lazy(() => import('./Pages/Mouvements'));
+const Reclamations = React.lazy(() => import('./Pages/Reclamations'));
+const Transferts = React.lazy(() => import('./Pages/Transferts'));
+const NotFound = React.lazy(() => import('./Pages/NotFound'));
+
+// ─── Loading Fallback ──────────────────────────────────────────────
+import CircularProgress from '@mui/material/CircularProgress';
+
+function PageLoader() {
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '60vh',
+      }}
+    >
+      <CircularProgress size={40} sx={{ color: '#1565C0' }} />
+    </Box>
+  );
+}
 
 const DRAWER_WIDTH = 260;
 
@@ -144,15 +162,17 @@ function SidebarContent({ onItemClick }) {
           component="img"
           src={ensaLogo}
           alt="ENSA Logo"
+          loading="lazy"
+          width={92}
+          height={40}
           sx={{
-            width: 52,
-            height: 52,
-            borderRadius: 2,
+            width: 92,
+            height: 40,
+            borderRadius: 0,
             objectFit: 'contain',
-            bgcolor: '#fff',
-            p: 0.5,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            imageRendering: 'auto',
             animation: 'logoPulse 3s ease-in-out infinite',
+            willChange: 'transform, opacity',
           }}
         />
         <Box>
@@ -466,90 +486,94 @@ function AppRoutes() {
   if (isPublic) {
     return (
       <PublicLayout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/connexion" element={<Connexion />} />
-        </Routes>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/connexion" element={<Connexion />} />
+          </Routes>
+        </Suspense>
       </PublicLayout>
     );
   }
 
   return (
     <DashboardLayout>
-      <Routes>
-        {/* Dashboard */}
-        <Route
-          path="/diagramme"
-          element={<ProtectedRoute><Diagramme /></ProtectedRoute>}
-        />
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          {/* Dashboard */}
+          <Route
+            path="/diagramme"
+            element={<ProtectedRoute><Diagramme /></ProtectedRoute>}
+          />
 
-        {/* Étudiants */}
-        <Route
-          path="/diagramme/donnee"
-          element={<ProtectedRoute><Donnee /></ProtectedRoute>}
-        />
-        <Route
-          path="/ajouter"
-          element={<ProtectedRoute><Ajouter /></ProtectedRoute>}
-        />
+          {/* Étudiants */}
+          <Route
+            path="/diagramme/donnee"
+            element={<ProtectedRoute><Donnee /></ProtectedRoute>}
+          />
+          <Route
+            path="/ajouter"
+            element={<ProtectedRoute><Ajouter /></ProtectedRoute>}
+          />
 
-        {/* Dossiers */}
-        <Route
-          path="/dossiers"
-          element={
-            <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN_SYSTEME', 'RESPONSABLE_ARCHIVES', 'AGENT_ACCUEIL', 'CONSULTANT']}>
-              <Dossiers />
-            </ProtectedRoute>
-          }
-        />
+          {/* Dossiers */}
+          <Route
+            path="/dossiers"
+            element={
+              <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN_SYSTEME', 'RESPONSABLE_ARCHIVES', 'AGENT_ACCUEIL', 'CONSULTANT']}>
+                <Dossiers />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* Mouvements */}
-        <Route
-          path="/mouvements"
-          element={
-            <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN_SYSTEME', 'AGENT_ACCUEIL']}>
-              <Mouvements />
-            </ProtectedRoute>
-          }
-        />
+          {/* Mouvements */}
+          <Route
+            path="/mouvements"
+            element={
+              <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN_SYSTEME', 'AGENT_ACCUEIL']}>
+                <Mouvements />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* Réclamations */}
-        <Route
-          path="/reclamations"
-          element={<ProtectedRoute><Reclamations /></ProtectedRoute>}
-        />
+          {/* Réclamations */}
+          <Route
+            path="/reclamations"
+            element={<ProtectedRoute><Reclamations /></ProtectedRoute>}
+          />
 
-        {/* Transferts */}
-        <Route
-          path="/transferts"
-          element={
-            <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN_SYSTEME', 'RESPONSABLE_ARCHIVES']}>
-              <Transferts />
-            </ProtectedRoute>
-          }
-        />
+          {/* Transferts */}
+          <Route
+            path="/transferts"
+            element={
+              <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN_SYSTEME', 'RESPONSABLE_ARCHIVES']}>
+                <Transferts />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* Utilisateurs */}
-        <Route
-          path="/diagramme/admin"
-          element={
-            <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN_SYSTEME']}>
-              <Admin />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/adduti"
-          element={
-            <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN_SYSTEME', 'RESPONSABLE_ARCHIVES']}>
-              <Adduti />
-            </ProtectedRoute>
-          }
-        />
+          {/* Utilisateurs */}
+          <Route
+            path="/diagramme/admin"
+            element={
+              <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN_SYSTEME']}>
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/adduti"
+            element={
+              <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN_SYSTEME', 'RESPONSABLE_ARCHIVES']}>
+                <Adduti />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* 404 — Catch-all */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          {/* 404 — Catch-all */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </DashboardLayout>
   );
 }

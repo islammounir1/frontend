@@ -136,14 +136,12 @@ const theme = createTheme({
 // ─── Montage de l'application ──────────────────────────────────────
 const root = createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <AuthProvider>
-        <SnackbarProvider>
-          <App />
-        </SnackbarProvider>
-      </AuthProvider>
-    </ThemeProvider>
-  </React.StrictMode>
+  <ThemeProvider theme={theme}>
+    <CssBaseline />
+    <AuthProvider>
+      <SnackbarProvider>
+        <App />
+      </SnackbarProvider>
+    </AuthProvider>
+  </ThemeProvider>
 );

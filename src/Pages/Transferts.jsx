@@ -241,10 +241,10 @@ export default function Transferts() {
               <TextField fullWidth label="École de destination" value={form.ecoleDestination} onChange={e => setForm({ ...form, ecoleDestination: e.target.value })} required />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField fullWidth label="Date demande" type="date" value={form.dateDemande} onChange={e => setForm({ ...form, dateDemande: e.target.value })} InputLabelProps={{ shrink: true }} required />
+              <TextField fullWidth label="Date demande" type={form.dateDemande ? "date" : "text"} onFocus={(e) => e.target.type = "date"} onBlur={(e) => { if (!form.dateDemande) e.target.type = "text"; }} value={form.dateDemande} onChange={e => setForm({ ...form, dateDemande: e.target.value })} required />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField fullWidth label="Date validation" type="date" value={form.dateValidation} onChange={e => setForm({ ...form, dateValidation: e.target.value })} InputLabelProps={{ shrink: true }} />
+              <TextField fullWidth label="Date validation" type={form.dateValidation ? "date" : "text"} onFocus={(e) => e.target.type = "date"} onBlur={(e) => { if (!form.dateValidation) e.target.type = "text"; }} value={form.dateValidation} onChange={e => setForm({ ...form, dateValidation: e.target.value })} />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField fullWidth select label="Statut" value={form.statut} onChange={e => setForm({ ...form, statut: e.target.value })} required>

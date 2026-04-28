@@ -254,7 +254,7 @@ export default function Mouvements() {
               </TextField>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField fullWidth label="Date" type="date" value={form.dateMouvement} onChange={e => setForm({ ...form, dateMouvement: e.target.value })} InputLabelProps={{ shrink: true }} required />
+              <TextField fullWidth label="Date" type={form.dateMouvement ? "date" : "text"} onFocus={(e) => e.target.type = "date"} onBlur={(e) => { if (!form.dateMouvement) e.target.type = "text"; }} value={form.dateMouvement} onChange={e => setForm({ ...form, dateMouvement: e.target.value })} required />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField fullWidth select label="Statut" value={form.statut} onChange={e => setForm({ ...form, statut: e.target.value })} required>
@@ -271,7 +271,7 @@ export default function Mouvements() {
               <TextField fullWidth label="Destination" value={form.destination} onChange={e => setForm({ ...form, destination: e.target.value })} />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField fullWidth label="Date retour prévu" type="date" value={form.dateRetourPrevu} onChange={e => setForm({ ...form, dateRetourPrevu: e.target.value })} InputLabelProps={{ shrink: true }} />
+              <TextField fullWidth label="Date retour prévu" type={form.dateRetourPrevu ? "date" : "text"} onFocus={(e) => e.target.type = "date"} onBlur={(e) => { if (!form.dateRetourPrevu) e.target.type = "text"; }} value={form.dateRetourPrevu} onChange={e => setForm({ ...form, dateRetourPrevu: e.target.value })} />
             </Grid>
           </Grid>
         </DialogContent>

@@ -1,15 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* Google Fonts loaded via index.html <link> for non-blocking behavior */
 
 /* ─── Logo Animations ───────────────────────────────────────────── */
 @keyframes logoPulse {
-  0%, 100% { filter: drop-shadow(0 0 6px rgba(21, 101, 192, 0.3)); transform: scale(1); }
-  50% { filter: drop-shadow(0 0 14px rgba(21, 101, 192, 0.5)); transform: scale(1.04); }
+  0%, 100% { transform: scale(1); opacity: 0.95; }
+  50% { transform: scale(1.04); opacity: 1; }
 }
 
 @keyframes logoShine {
-  0% { filter: brightness(1); }
-  50% { filter: brightness(1.15); }
-  100% { filter: brightness(1); }
+  0% { opacity: 0.9; }
+  50% { opacity: 1; }
+  100% { opacity: 0.9; }
 }
 
 /* ─── Global Reset ──────────────────────────────────────────────── */

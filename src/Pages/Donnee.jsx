@@ -33,11 +33,13 @@ import InputLabel from '@mui/material/InputLabel';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import SchoolIcon from '@mui/icons-material/School';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import EditIcon from '@mui/icons-material/Edit';
+import Alert from '@mui/material/Alert';
 import { normalizeFiliere } from '../utils/normalizeFiliere';
 
 export default function Donnee() {
@@ -55,6 +57,10 @@ export default function Donnee() {
   const [editLoading, setEditLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [deleteAllDialog, setDeleteAllDialog] = useState(false);
+  const [deleteAllCode, setDeleteAllCode] = useState('');
+  const [deleteAllLoading, setDeleteAllLoading] = useState(false);
+  const [deleteAllError, setDeleteAllError] = useState('');
   const fileInputRef = useRef(null);
 
   useEffect(() => { loadData(); }, []);
@@ -104,6 +110,36 @@ export default function Donnee() {
   const clearFiliereFilter = () => {
     setFiliereFilter('');
     setSearchParams({});
+  };
+
+  // ─── Delete All Students ──────────────────────────────────
+  const openDeleteAllDialog = () => {
+    setDeleteAllCode('');
+    setDeleteAllError('');
+    setDeleteAllDialog(true);
+  };
+
+  const handleDeleteAll = async () => {
+    if (!deleteAllCode.trim()) {
+      setDeleteAllError('Veuillez entrer le code de confirmation.');
+      return;
+    }
+    setDeleteAllLoading(true);
+    setDeleteAllError('');
+    try {
+      const res = await etudiantService.deleteAll(deleteAllCode.trim());
+      showSuccess(res.data?.message || 'Tous les étudiants ont été supprimés !');
+      setEtudiants([]);
+      setDeleteAllDialog(false);
+    } catch (err) {
+      if (err.response?.status === 403) {
+        setDeleteAllError('Code de confirmation incorrect.');
+      } else {
+        setDeleteAllError(err.response?.data?.message || 'Erreur lors de la suppression.');
+      }
+    } finally {
+      setDeleteAllLoading(false);
+    }
   };
 
   // Liste unique des filières pour le dropdown
@@ -191,6 +227,18 @@ export default function Donnee() {
               sx={{ borderColor: '#E65100', color: '#E65100', '&:hover': { borderColor: '#BF360C', bgcolor: 'rgba(230,81,0,0.04)' } }}
             >
               Exporter
+            </Button>
+          </Tooltip>
+          {/* Delete All */}
+          <Tooltip title="Supprimer tous les étudiants">
+            <Button
+              variant="outlined"
+              startIcon={<DeleteSweepIcon />}
+              onClick={openDeleteAllDialog}
+              disabled={etudiants.length === 0}
+              sx={{ borderColor: '#C62828', color: '#C62828', '&:hover': { borderColor: '#B71C1C', bgcolor: 'rgba(198,40,40,0.04)' } }}
+            >
+              Supprimer tout
             </Button>
           </Tooltip>
           {/* Add */}
@@ -329,7 +377,7 @@ export default function Donnee() {
             <Grid size={{xs:12,sm:6,md:4}}><TextField fullWidth label="Prénom" value={editForm.prenom||''} onChange={e => setEditForm({...editForm,prenom:e.target.value})} /></Grid>
             <Grid size={{xs:12,sm:6,md:4}}><TextField fullWidth label="Email" value={editForm.email||''} onChange={e => setEditForm({...editForm,email:e.target.value})} /></Grid>
             <Grid size={{xs:12,sm:6,md:4}}><TextField fullWidth label="Téléphone" value={editForm.telephone||''} onChange={e => setEditForm({...editForm,telephone:e.target.value})} /></Grid>
-            <Grid size={{xs:12,sm:6,md:4}}><TextField fullWidth label="Date naissance" type="date" value={editForm.dateNaissance||''} onChange={e => setEditForm({...editForm,dateNaissance:e.target.value})} InputLabelProps={{shrink:true}} /></Grid>
+            <Grid size={{xs:12,sm:6,md:4}}><TextField fullWidth label="Date naissance" type={editForm.dateNaissance ? "date" : "text"} onFocus={(e) => e.target.type = "date"} onBlur={(e) => { if (!editForm.dateNaissance) e.target.type = "text"; }} value={editForm.dateNaissance||''} onChange={e => setEditForm({...editForm,dateNaissance:e.target.value})} /></Grid>
             <Grid size={{xs:12,sm:6,md:4}}><TextField fullWidth label="Lieu naissance" value={editForm.lieuNaissance||''} onChange={e => setEditForm({...editForm,lieuNaissance:e.target.value})} /></Grid>
             <Grid size={{xs:12,sm:6,md:4}}><TextField fullWidth label="Nationalité" value={editForm.nationalite||''} onChange={e => setEditForm({...editForm,nationalite:e.target.value})} /></Grid>
             <Grid size={{xs:12,sm:6,md:4}}><TextField fullWidth select label="Sexe" value={editForm.sexe||''} onChange={e => setEditForm({...editForm,sexe:e.target.value})}><MenuItem value="MASCULIN">Masculin</MenuItem><MenuItem value="FEMININ">Féminin</MenuItem></TextField></Grid>
@@ -345,6 +393,45 @@ export default function Donnee() {
           <Button onClick={() => setEditDialog({ open: false, etudiant: null })} color="inherit">Annuler</Button>
           <Button onClick={handleEdit} variant="contained" disabled={editLoading}>
             {editLoading ? 'Sauvegarde...' : 'Sauvegarder'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete All Dialog */}
+      <Dialog open={deleteAllDialog} onClose={() => setDeleteAllDialog(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
+        <DialogTitle sx={{ fontWeight: 700, color: '#C62828', display: 'flex', alignItems: 'center', gap: 1 }}>
+          <DeleteSweepIcon /> Supprimer tous les étudiants
+        </DialogTitle>
+        <DialogContent>
+          <Alert severity="warning" sx={{ mb: 2.5, mt: 0.5 }}>
+            <strong>Attention !</strong> Cette action est irréversible et supprimera <strong>{etudiants.length} étudiant(s)</strong> de la base de données.
+          </Alert>
+          <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+            Pour confirmer cette action, veuillez entrer le code de sécurité fourni par l'administrateur :
+          </Typography>
+          <TextField
+            fullWidth
+            label="Code de confirmation"
+            placeholder="Entrez le code de sécurité..."
+            value={deleteAllCode}
+            onChange={(e) => { setDeleteAllCode(e.target.value); setDeleteAllError(''); }}
+            error={!!deleteAllError}
+            helperText={deleteAllError}
+            autoFocus
+            onKeyDown={(e) => { if (e.key === 'Enter') handleDeleteAll(); }}
+            sx={{ mt: 1 }}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setDeleteAllDialog(false)} color="inherit" disabled={deleteAllLoading}>Annuler</Button>
+          <Button
+            onClick={handleDeleteAll}
+            variant="contained"
+            color="error"
+            disabled={deleteAllLoading || !deleteAllCode.trim()}
+            startIcon={deleteAllLoading ? <CircularProgress size={18} color="inherit" /> : <DeleteSweepIcon />}
+          >
+            {deleteAllLoading ? 'Suppression...' : 'Confirmer la suppression'}
           </Button>
         </DialogActions>
       </Dialog>

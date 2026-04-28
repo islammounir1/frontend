@@ -22,7 +22,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 // Logo
-import ensaLogo from '../assets/ensa-logo.png';
+import ensaLogo from '../assets/ensa-logo.jpg';
 
 export default function Connexion() {
   const navigate = useNavigate();
@@ -151,18 +151,19 @@ export default function Connexion() {
               component="img"
               src={ensaLogo}
               alt="ENSA Logo"
+              loading="lazy"
+              width={210}
+              height={91}
               sx={{
-                width: 80,
-                height: 80,
+                width: { xs: 170, sm: 210 },
+                height: 'auto',
                 objectFit: 'contain',
-                borderRadius: 3,
-                bgcolor: '#fff',
-                p: 1.5,
+                imageRendering: 'auto',
                 mx: 'auto',
                 mb: 2,
                 display: 'block',
-                boxShadow: '0 4px 16px rgba(21, 101, 192, 0.3)',
                 animation: 'logoPulse 3s ease-in-out infinite',
+                willChange: 'transform, opacity',
               }}
             />
             <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary' }}>
