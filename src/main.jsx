@@ -67,6 +67,13 @@ const theme = createTheme({
             boxShadow: '0 4px 12px rgba(21, 101, 192, 0.3)',
           },
         },
+        outlined: {
+          // Avoid non-composited border-color animations (Lighthouse CLS)
+          transition: 'background-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease',
+          '&:hover': {
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.12)',
+          },
+        },
         containedPrimary: {
           background: 'linear-gradient(135deg, #1565C0, #42A5F5)',
           '&:hover': {

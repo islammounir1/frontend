@@ -6,8 +6,13 @@ const dossierService = {
   create: (data) => api.post('/dossiers', data),
   update: (id, data) => api.put(`/dossiers/${id}`, data),
   delete: (id) => api.delete(`/dossiers/${id}`),
-  export: () =>
-    api.get('/dossiers/export', { responseType: 'blob' }),
+  export: (filiere) =>
+    api.get('/dossiers/export', {
+      responseType: 'blob',
+      params: filiere ? { filiere } : {},
+    }),
+  generateFromEtudiants: (data) =>
+    api.post('/dossiers/generate-from-etudiants', data),
 };
 
 export default dossierService;

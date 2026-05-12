@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import utilisateurService from '../services/utilisateurService';
+import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 import { useSnackbar } from '../contexts/SnackbarContext';
 import Box from '@mui/material/Box';
@@ -35,6 +36,8 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import CircularProgress from '@mui/material/CircularProgress';
 import Tooltip from '@mui/material/Tooltip';
+import StarIcon from '@mui/icons-material/Star';
+import ShieldIcon from '@mui/icons-material/Shield';
 
 const ROLE_CONFIG = {
   SUPER_ADMIN: { label: 'Super Admin', color: '#C62828', bg: '#FFEBEE' },
@@ -47,6 +50,7 @@ const ROLE_CONFIG = {
 
 export default function Adduti() {
   const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
   const { showSuccess, showError } = useSnackbar();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -65,6 +69,48 @@ export default function Adduti() {
     try { const res = await utilisateurService.getAll(); setUsers(res.data); }
     catch { showError('Erreur lors du chargement des utilisateurs'); }
     finally { setLoading(false); }
+  };
+
+  // ─── Permissions helpers ──────────────────────────────────────
+  const isSelf = (u) => currentUser?.id === u.id;
+  const isCurrentOrigin = currentUser?.is_origin;
+  const isCurrentSuperAdmin = currentUser?.role === 'SUPER_ADMIN';
+
+  /** Peut-on modifier cet utilisateur ? */
+  const canEdit = (u) => {
+    // On ne peut pas se modifier soi-même via cette page (utiliser le profil)
+    if (isSelf(u)) return false;
+    // Personne ne peut modifier l'admin origin (sauf via profil)
+    if (u.is_origin) return false;
+    // Un super admin non-origin ne peut pas modifier un autre super admin
+    if (!isCurrentOrigin && u.role === 'SUPER_ADMIN') return false;
+    return true;
+  };
+
+  /** Peut-on supprimer cet utilisateur ? */
+  const canDelete = (u) => {
+    // On ne peut pas se supprimer soi-même
+    if (isSelf(u)) return false;
+    // L'admin origin ne peut jamais être supprimé
+    if (u.is_origin) return false;
+    // Un super admin non-origin ne peut pas supprimer un autre super admin
+    if (!isCurrentOrigin && u.role === 'SUPER_ADMIN') return false;
+    return true;
+  };
+
+  /** Tooltip pour bouton désactivé */
+  const getEditTooltip = (u) => {
+    if (isSelf(u)) return 'Utilisez la page Profil pour modifier vos informations';
+    if (u.is_origin) return 'L\'administrateur d\'origine est protégé';
+    if (!isCurrentOrigin && u.role === 'SUPER_ADMIN') return 'Seul l\'admin d\'origine peut modifier un super admin';
+    return 'Modifier';
+  };
+
+  const getDeleteTooltip = (u) => {
+    if (isSelf(u)) return 'Vous ne pouvez pas supprimer votre propre compte';
+    if (u.is_origin) return 'L\'administrateur d\'origine ne peut pas être supprimé';
+    if (!isCurrentOrigin && u.role === 'SUPER_ADMIN') return 'Seul l\'admin d\'origine peut supprimer un super admin';
+    return 'Supprimer';
   };
 
   const handleDelete = async () => {
@@ -90,6 +136,21 @@ export default function Adduti() {
       setEditDialog({ open: false, user: null });
     } catch { showError('Erreur lors de la modification'); }
     finally { setEditLoading(false); }
+  };
+
+  /** Rôles disponibles dans le select d'édition */
+  const getEditableRoles = () => {
+    const roles = [
+      { value: 'ADMIN_SYSTEME', label: 'Admin Système' },
+      { value: 'RESPONSABLE_ARCHIVES', label: 'Resp. Archives' },
+      { value: 'AGENT_ACCUEIL', label: 'Agent Accueil' },
+      { value: 'CONSULTANT', label: 'Consultant' },
+    ];
+    // Seul l'admin origin peut assigner/voir le rôle SUPER_ADMIN
+    if (isCurrentOrigin) {
+      roles.unshift({ value: 'SUPER_ADMIN', label: 'Super Admin' });
+    }
+    return roles;
   };
 
   const roleStats = {
@@ -206,15 +267,41 @@ export default function Adduti() {
               ) : (
                 users.map(u => {
                   const rc = ROLE_CONFIG[u.role] || { label: u.role, color: '#666', bg: '#f5f5f5' };
+                  const editAllowed = canEdit(u);
+                  const deleteAllowed = canDelete(u);
                   return (
                     <TableRow key={u.id} hover>
-                      <TableCell sx={{ fontWeight: 500 }}>{u.nom}</TableCell>
+                      <TableCell sx={{ fontWeight: 500 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {u.nom}
+                          {u.is_origin && (
+                            <Tooltip title="Administrateur d'origine (protégé)">
+                              <StarIcon sx={{ fontSize: 16, color: '#F57F17' }} />
+                            </Tooltip>
+                          )}
+                          {isSelf(u) && (
+                            <Chip label="Vous" size="small" sx={{ height: 20, fontSize: '0.65rem', fontWeight: 600, bgcolor: '#E3F2FD', color: '#1565C0' }} />
+                          )}
+                        </Box>
+                      </TableCell>
                       <TableCell>{u.prenom}</TableCell>
                       <TableCell sx={{ color: 'text.secondary' }}>{u.email}</TableCell>
                       <TableCell><Chip label={rc.label} size="small" sx={{ bgcolor: rc.bg, color: rc.color, fontWeight: 600 }} /></TableCell>
                       <TableCell align="right">
-                        <IconButton size="small" onClick={() => openEdit(u)} sx={{ color: '#1565C0' }} title="Modifier"><EditIcon fontSize="small" /></IconButton>
-                        <IconButton size="small" onClick={() => setDeleteDialog({ open: true, id: u.id, name: `${u.nom} ${u.prenom}` })} sx={{ color: '#C62828' }} title="Supprimer"><DeleteIcon fontSize="small" /></IconButton>
+                        <Tooltip title={getEditTooltip(u)}>
+                          <span>
+                            <IconButton size="small" onClick={() => openEdit(u)} disabled={!editAllowed} sx={{ color: editAllowed ? '#1565C0' : 'text.disabled' }}>
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                        <Tooltip title={getDeleteTooltip(u)}>
+                          <span>
+                            <IconButton size="small" onClick={() => setDeleteDialog({ open: true, id: u.id, name: `${u.nom} ${u.prenom}` })} disabled={!deleteAllowed} sx={{ color: deleteAllowed ? '#C62828' : 'text.disabled' }}>
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
                       </TableCell>
                     </TableRow>
                   );
@@ -234,7 +321,13 @@ export default function Adduti() {
             <Grid size={{xs:12,sm:6}}><TextField fullWidth label="Prénom" value={editForm.prenom||''} onChange={e => setEditForm({...editForm,prenom:e.target.value})} /></Grid>
             <Grid size={{xs:12}}><TextField fullWidth label="Email" value={editForm.email||''} onChange={e => setEditForm({...editForm,email:e.target.value})} /></Grid>
             <Grid size={{xs:12,sm:6}}><TextField fullWidth label="Téléphone" value={editForm.telephone||''} onChange={e => setEditForm({...editForm,telephone:e.target.value})} /></Grid>
-            <Grid size={{xs:12,sm:6}}><TextField fullWidth select label="Rôle" value={editForm.role||''} onChange={e => setEditForm({...editForm,role:e.target.value})}><MenuItem value="SUPER_ADMIN">Super Admin</MenuItem><MenuItem value="ADMIN_SYSTEME">Admin Système</MenuItem><MenuItem value="RESPONSABLE_ARCHIVES">Resp. Archives</MenuItem><MenuItem value="AGENT_ACCUEIL">Agent Accueil</MenuItem><MenuItem value="CONSULTANT">Consultant</MenuItem></TextField></Grid>
+            <Grid size={{xs:12,sm:6}}>
+              <TextField fullWidth select label="Rôle" value={editForm.role||''} onChange={e => setEditForm({...editForm,role:e.target.value})}>
+                {getEditableRoles().map(r => (
+                  <MenuItem key={r.value} value={r.value}>{r.label}</MenuItem>
+                ))}
+              </TextField>
+            </Grid>
           </Grid>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>

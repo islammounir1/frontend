@@ -7,12 +7,14 @@
     <meta name="description" content="ArchivePro — Plateforme de gestion des archives de l'École Nationale des Sciences Appliquées. Gestion des dossiers étudiants, mouvements et réclamations." />
     <title>ArchivePro — Gestion d'Archives ENSA</title>
 
-    <!-- Preconnect for faster font + API loading -->
+    <!-- Preconnect for faster font loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
 
-    <!-- Google Fonts — non-render-blocking via link instead of CSS @import -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" />
+    <!-- Google Fonts — non-render-blocking: preload then swap -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" /></noscript>
   </head>
   <body>
     <div id="root"></div>

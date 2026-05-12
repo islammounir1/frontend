@@ -22,7 +22,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 // Logo
-import ensaLogo from '../assets/ensa-logo.jpg';
+import ensaLogo from '../assets/ensa_logo.png';
 
 export default function Connexion() {
   const navigate = useNavigate();

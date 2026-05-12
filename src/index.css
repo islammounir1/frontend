@@ -2,8 +2,8 @@
 
 /* ─── Logo Animations ───────────────────────────────────────────── */
 @keyframes logoPulse {
-  0%, 100% { transform: scale(1); opacity: 0.95; }
-  50% { transform: scale(1.04); opacity: 1; }
+  0%, 100% { transform: scale3d(1,1,1); opacity: 0.95; }
+  50% { transform: scale3d(1.04,1.04,1); opacity: 1; }
 }
 
 @keyframes logoShine {
@@ -68,8 +68,8 @@ body {
 }
 
 /* ─── Smooth transitions globally ───────────────────────────────── */
-a, button {
-  transition: all 0.2s ease;
+a {
+  transition: color 0.2s ease;
 }
 
 img {
