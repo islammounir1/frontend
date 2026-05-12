@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import utilisateurService from '../services/utilisateurService';
+import { useAuth } from '../contexts/AuthContext';
 import { useSnackbar } from '../contexts/SnackbarContext';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -27,11 +28,30 @@ const initialForm = { username: '', nom: '', prenom: '', email: '', password: ''
 
 export default function Admin() {
   const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
   const { showSuccess, showError } = useSnackbar();
   const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
+
+  const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN';
+
+  // ─── Rôles disponibles selon l'utilisateur connecté ──────────
+  const getAvailableRoles = () => {
+    const roles = [];
+    if (isSuperAdmin) {
+      roles.push({ value: 'SUPER_ADMIN', label: 'Super Administrateur' });
+      roles.push({ value: 'ADMIN_SYSTEME', label: 'Administrateur Système' });
+      roles.push({ value: 'RESPONSABLE_ARCHIVES', label: 'Responsable Archives' });
+      roles.push({ value: 'AGENT_ACCUEIL', label: 'Agent d\'accueil' });
+    } else {
+      // ADMIN_SYSTEME ne peut créer que RESPONSABLE_ARCHIVES et AGENT_ACCUEIL
+      roles.push({ value: 'RESPONSABLE_ARCHIVES', label: 'Responsable Archives' });
+      roles.push({ value: 'AGENT_ACCUEIL', label: 'Agent d\'accueil' });
+    }
+    return roles;
+  };
 
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -94,7 +114,13 @@ export default function Admin() {
               <Grid size={{xs:12,sm:6}}><TextField fullWidth name="email" label="Email" type="email" value={form.email} onChange={handleChange} error={!!errors.email} helperText={errors.email} required InputProps={{ startAdornment: <InputAdornment position="start"><EmailIcon sx={{color:'text.secondary',fontSize:20}}/></InputAdornment> }} /></Grid>
               <Grid size={{xs:12,sm:6}}><TextField fullWidth name="telephone" label="Téléphone" value={form.telephone} onChange={handleChange} InputProps={{ startAdornment: <InputAdornment position="start"><PhoneIcon sx={{color:'text.secondary',fontSize:20}}/></InputAdornment> }} /></Grid>
               <Grid size={{xs:12,sm:6}}><TextField fullWidth name="password" label="Mot de passe" type={showPassword?'text':'password'} value={form.password} onChange={handleChange} error={!!errors.password} helperText={errors.password} required InputProps={{ startAdornment: <InputAdornment position="start"><LockIcon sx={{color:'text.secondary',fontSize:20}}/></InputAdornment>, endAdornment: <InputAdornment position="end"><IconButton onClick={()=>setShowPassword(!showPassword)} edge="end" size="small">{showPassword?<VisibilityOffIcon/>:<VisibilityIcon/>}</IconButton></InputAdornment> }} /></Grid>
-              <Grid size={{xs:12,sm:6}}><TextField fullWidth select name="role" label="Rôle" value={form.role} onChange={handleChange} error={!!errors.role} helperText={errors.role} required><MenuItem value="SUPER_ADMIN">Super Administrateur</MenuItem><MenuItem value="ADMIN_SYSTEME">Administrateur Système</MenuItem><MenuItem value="RESPONSABLE_ARCHIVES">Responsable Archives</MenuItem><MenuItem value="AGENT_ACCUEIL">Agent d'accueil</MenuItem><MenuItem value="CONSULTANT">Consultant</MenuItem></TextField></Grid>
+              <Grid size={{xs:12,sm:6}}>
+                <TextField fullWidth select name="role" label="Rôle" value={form.role} onChange={handleChange} error={!!errors.role} helperText={errors.role} required>
+                  {getAvailableRoles().map(r => (
+                    <MenuItem key={r.value} value={r.value}>{r.label}</MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
             </Grid>
 
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 4 }}>

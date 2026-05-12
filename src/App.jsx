@@ -40,9 +40,10 @@ import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import ArchiveIcon from '@mui/icons-material/Archive';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 // Logo
-import ensaLogo from './assets/ensa-logo.jpg';
+import ensaLogo from './assets/ensa_logo.png';
 
 // Pages — Lazy loaded for code splitting
 const Home = React.lazy(() => import('./Pages/Home'));
@@ -56,6 +57,7 @@ const Dossiers = React.lazy(() => import('./Pages/Dossiers'));
 const Mouvements = React.lazy(() => import('./Pages/Mouvements'));
 const Reclamations = React.lazy(() => import('./Pages/Reclamations'));
 const Transferts = React.lazy(() => import('./Pages/Transferts'));
+const Profile = React.lazy(() => import('./Pages/Profile'));
 const NotFound = React.lazy(() => import('./Pages/NotFound'));
 
 // ─── Loading Fallback ──────────────────────────────────────────────
@@ -134,6 +136,12 @@ const allMenuItems = [
     path: '/diagramme/admin',
     roles: ['SUPER_ADMIN', 'ADMIN_SYSTEME'],
   },
+  {
+    text: 'Mon Profil',
+    icon: <AccountCircleIcon />,
+    path: '/profile',
+    roles: ['SUPER_ADMIN', 'ADMIN_SYSTEME', 'RESPONSABLE_ARCHIVES', 'AGENT_ACCUEIL', 'CONSULTANT', 'ETUDIANT'],
+  },
 ];
 
 // ─── Sidebar Drawer ────────────────────────────────────────────────
@@ -171,8 +179,6 @@ function SidebarContent({ onItemClick }) {
             borderRadius: 0,
             objectFit: 'contain',
             imageRendering: 'auto',
-            animation: 'logoPulse 3s ease-in-out infinite',
-            willChange: 'transform, opacity',
           }}
         />
         <Box>
@@ -420,9 +426,13 @@ function DashboardLayout({ children }) {
                   label={`${user.prenom} ${user.nom}`}
                   variant="outlined"
                   size="small"
+                  onClick={() => navigate('/profile')}
                   sx={{
                     borderColor: 'divider',
                     display: { xs: 'none', sm: 'flex' },
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    '&:hover': { bgcolor: 'rgba(21, 101, 192, 0.06)', borderColor: '#1565C0' },
                   }}
                 />
               )}
@@ -566,6 +576,16 @@ function AppRoutes() {
             element={
               <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN_SYSTEME', 'RESPONSABLE_ARCHIVES']}>
                 <Adduti />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Profil */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
           />

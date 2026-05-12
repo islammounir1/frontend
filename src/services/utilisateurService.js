@@ -8,6 +8,10 @@ const utilisateurService = {
   delete: (id) => api.delete(`/utilisateurs/${id}`),
   export: () =>
     api.get('/utilisateurs/export', { responseType: 'blob' }),
+
+  // ─── Profil ──────────────────────────────────────────────────
+  getProfile: () => api.get('/profile'),
+  updateProfile: (data) => api.put('/profile', data),
 };
 
 export default utilisateurService;

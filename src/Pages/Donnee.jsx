@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, forwardRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { TableVirtuoso } from 'react-virtuoso';
 import etudiantService from '../services/etudiantService';
 import api from '../services/api';
 import { useSnackbar } from '../contexts/SnackbarContext';
@@ -40,7 +41,7 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import EditIcon from '@mui/icons-material/Edit';
 import Alert from '@mui/material/Alert';
-import { normalizeFiliere } from '../utils/normalizeFiliere';
+import { normalizeFiliere, FILIERES_OFFICIELLES } from '../utils/normalizeFiliere';
 
 export default function Donnee() {
   const navigate = useNavigate();
@@ -142,15 +143,8 @@ export default function Donnee() {
     }
   };
 
-  // Liste unique des filières pour le dropdown
-  const uniqueFilieres = useMemo(() => {
-    const set = new Set();
-    etudiants.forEach(e => {
-      const n = normalizeFiliere(e.filiere);
-      if (n) set.add(n);
-    });
-    return [...set].sort();
-  }, [etudiants]);
+  // Liste des filières officielles pour le dropdown
+  const uniqueFilieres = FILIERES_OFFICIELLES;
 
   const filtered = etudiants.filter(e => {
     const matchSearch = [e.nom, e.prenom, e.cne, e.email, e.filiere].some(f => f?.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -162,16 +156,18 @@ export default function Donnee() {
   const handleExport = async () => {
     setExporting(true);
     try {
-      const res = await etudiantService.export();
+      // Passer la filière sélectionnée (ou vide pour toutes les filières officielles)
+      const res = await etudiantService.export(filiereFilter || null);
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `etudiants_${new Date().toISOString().slice(0,10)}.xlsx`);
+      const suffix = filiereFilter ? `_${filiereFilter}` : '';
+      link.setAttribute('download', `etudiants${suffix}_${new Date().toISOString().slice(0,10)}.xlsx`);
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-      showSuccess('Fichier Excel exporté avec succès !');
+      showSuccess(`Fichier Excel exporté avec succès${filiereFilter ? ` (filière: ${filiereFilter})` : ''} !`);
     } catch { showError('Erreur lors de l\'export Excel'); }
     finally { setExporting(false); }
   };
@@ -269,58 +265,77 @@ export default function Donnee() {
             }}
           >
             <MenuItem value=""><em>Toutes les filières</em></MenuItem>
-            {uniqueFilieres.map(f => <MenuItem key={f} value={f}>{f}</MenuItem>)}
+            {uniqueFilieres.map(f => <MenuItem key={f.code} value={f.code}>{f.code} — {f.label}</MenuItem>)}
           </Select>
         </FormControl>
       </Box>
 
       <Fade in timeout={500}>
-        <TableContainer component={Paper} sx={{ border: '1px solid rgba(0,0,0,0.06)', borderRadius: 2, maxHeight: 520, overflow: 'auto' }}>
-          <Table stickyHeader size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ fontWeight: 600, bgcolor: '#F8FAFC', minWidth: 150 }}>Nom Complet</TableCell>
-                <TableCell sx={{ fontWeight: 600, bgcolor: '#F8FAFC', minWidth: 120 }}>CNE</TableCell>
-                <TableCell sx={{ fontWeight: 600, bgcolor: '#F8FAFC', minWidth: 100 }}>CIN</TableCell>
-                <TableCell sx={{ fontWeight: 600, bgcolor: '#F8FAFC', minWidth: 100, display: { xs: 'none', md: 'table-cell' } }}>Email</TableCell>
-                <TableCell sx={{ fontWeight: 600, bgcolor: '#F8FAFC', minWidth: 130 }}>Filière</TableCell>
-                <TableCell sx={{ fontWeight: 600, bgcolor: '#F8FAFC', minWidth: 70 }}>Année</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600, bgcolor: '#F8FAFC', minWidth: 90, position: 'sticky', right: 0, zIndex: 3 }}>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {loading ? (
-                Array.from({ length: 5 }).map((_, i) => (
+        <TableContainer component={Paper} sx={{ border: '1px solid rgba(0,0,0,0.06)', borderRadius: 2, height: 520 }}>
+          {loading ? (
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 600, bgcolor: '#F8FAFC', minWidth: 150 }}>Nom Complet</TableCell>
+                  <TableCell sx={{ fontWeight: 600, bgcolor: '#F8FAFC', minWidth: 120 }}>CNE</TableCell>
+                  <TableCell sx={{ fontWeight: 600, bgcolor: '#F8FAFC', minWidth: 100 }}>CIN</TableCell>
+                  <TableCell sx={{ fontWeight: 600, bgcolor: '#F8FAFC', minWidth: 100, display: { xs: 'none', md: 'table-cell' } }}>Email</TableCell>
+                  <TableCell sx={{ fontWeight: 600, bgcolor: '#F8FAFC', minWidth: 130 }}>Filière</TableCell>
+                  <TableCell sx={{ fontWeight: 600, bgcolor: '#F8FAFC', minWidth: 70 }}>Année</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, bgcolor: '#F8FAFC', minWidth: 90 }}>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
                     {Array.from({ length: 7 }).map((_, j) => <TableCell key={j}><Skeleton /></TableCell>)}
                   </TableRow>
-                ))
-              ) : filtered.length === 0 ? (
+                ))}
+              </TableBody>
+            </Table>
+          ) : filtered.length === 0 ? (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', py: 6 }}>
+              <SchoolIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
+              <Typography sx={{ color: 'text.secondary' }}>Aucun étudiant trouvé</Typography>
+            </Box>
+          ) : (
+            <TableVirtuoso
+              data={filtered}
+              components={{
+                Scroller: forwardRef((props, ref) => <Box component="div" {...props} ref={ref} />),
+                Table: (props) => <Table {...props} sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }} size="small" />,
+                TableHead: forwardRef((props, ref) => <TableHead {...props} ref={ref} />),
+                TableRow: ({ item: _item, ...props }) => <TableRow {...props} hover sx={{ '&:hover': { bgcolor: 'rgba(21,101,192,0.02)' } }} />,
+                TableBody: forwardRef((props, ref) => <TableBody {...props} ref={ref} />),
+              }}
+              fixedHeaderContent={() => (
                 <TableRow>
-                  <TableCell colSpan={7} sx={{ textAlign: 'center', py: 6 }}>
-                    <SchoolIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
-                    <Typography sx={{ color: 'text.secondary' }}>Aucun étudiant trouvé</Typography>
-                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, bgcolor: '#F8FAFC', minWidth: 150 }}>Nom Complet</TableCell>
+                  <TableCell sx={{ fontWeight: 600, bgcolor: '#F8FAFC', minWidth: 120 }}>CNE</TableCell>
+                  <TableCell sx={{ fontWeight: 600, bgcolor: '#F8FAFC', minWidth: 100 }}>CIN</TableCell>
+                  <TableCell sx={{ fontWeight: 600, bgcolor: '#F8FAFC', minWidth: 100, display: { xs: 'none', md: 'table-cell' } }}>Email</TableCell>
+                  <TableCell sx={{ fontWeight: 600, bgcolor: '#F8FAFC', minWidth: 130 }}>Filière</TableCell>
+                  <TableCell sx={{ fontWeight: 600, bgcolor: '#F8FAFC', minWidth: 70 }}>Année</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, bgcolor: '#F8FAFC', minWidth: 90, position: 'sticky', right: 0, zIndex: 3 }}>Actions</TableCell>
                 </TableRow>
-              ) : (
-                filtered.map(e => (
-                  <TableRow key={e.id} hover sx={{ '&:hover': { bgcolor: 'rgba(21,101,192,0.02)' } }}>
-                    <TableCell sx={{ fontWeight: 500, whiteSpace: 'nowrap' }}>{e.nom} {e.prenom}</TableCell>
-                    <TableCell><Chip label={e.cne} size="small" sx={{ bgcolor: '#E3F2FD', color: '#1565C0', fontWeight: 600, fontSize: '0.75rem' }} /></TableCell>
-                    <TableCell sx={{ fontSize: '0.85rem' }}>{e.cin}</TableCell>
-                    <TableCell sx={{ color: 'text.secondary', fontSize: '0.85rem', display: { xs: 'none', md: 'table-cell' } }}>{e.email}</TableCell>
-                    <TableCell><Chip label={e.filiere || 'N/A'} size="small" variant="outlined" sx={{ fontSize: '0.7rem', maxWidth: 130, '& .MuiChip-label': { overflow: 'hidden', textOverflow: 'ellipsis' } }} /></TableCell>
-                    <TableCell sx={{ fontSize: '0.85rem' }}>{e.anneeInscription}</TableCell>
-                    <TableCell align="right" sx={{ whiteSpace: 'nowrap', position: 'sticky', right: 0, bgcolor: 'inherit', zIndex: 1 }}>
-                      <IconButton size="small" onClick={() => setSelectedEtudiant(e)} sx={{ color: '#1565C0' }} title="Détails"><VisibilityIcon fontSize="small" /></IconButton>
-                      <IconButton size="small" onClick={() => openEdit(e)} sx={{ color: '#E65100' }} title="Modifier"><EditIcon fontSize="small" /></IconButton>
-                      <IconButton size="small" onClick={() => setDeleteDialog({ open: true, id: e.id, name: `${e.nom} ${e.prenom}` })} sx={{ color: '#C62828' }} title="Supprimer"><DeleteIcon fontSize="small" /></IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))
               )}
-            </TableBody>
-          </Table>
+              itemContent={(_index, e) => (
+                <>
+                  <TableCell sx={{ fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{e.nom} {e.prenom}</TableCell>
+                  <TableCell><Chip label={e.cne} size="small" sx={{ bgcolor: '#E3F2FD', color: '#1565C0', fontWeight: 600, fontSize: '0.75rem' }} /></TableCell>
+                  <TableCell sx={{ fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis' }}>{e.cin}</TableCell>
+                  <TableCell sx={{ color: 'text.secondary', fontSize: '0.85rem', display: { xs: 'none', md: 'table-cell' }, overflow: 'hidden', textOverflow: 'ellipsis' }}>{e.email}</TableCell>
+                  <TableCell><Chip label={normalizeFiliere(e.filiere)} size="small" variant="outlined" sx={{ fontSize: '0.7rem', fontWeight: 600, maxWidth: 130, '& .MuiChip-label': { overflow: 'hidden', textOverflow: 'ellipsis' } }} /></TableCell>
+                  <TableCell sx={{ fontSize: '0.85rem' }}>{e.anneeInscription}</TableCell>
+                  <TableCell align="right" sx={{ whiteSpace: 'nowrap', position: 'sticky', right: 0, bgcolor: 'inherit', zIndex: 1 }}>
+                    <IconButton size="small" onClick={() => setSelectedEtudiant(e)} sx={{ color: '#1565C0' }} title="Détails"><VisibilityIcon fontSize="small" /></IconButton>
+                    <IconButton size="small" onClick={() => openEdit(e)} sx={{ color: '#E65100' }} title="Modifier"><EditIcon fontSize="small" /></IconButton>
+                    <IconButton size="small" onClick={() => setDeleteDialog({ open: true, id: e.id, name: `${e.nom} ${e.prenom}` })} sx={{ color: '#C62828' }} title="Supprimer"><DeleteIcon fontSize="small" /></IconButton>
+                  </TableCell>
+                </>
+              )}
+            />
+          )}
         </TableContainer>
       </Fade>
 
